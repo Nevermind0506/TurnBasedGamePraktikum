@@ -110,7 +110,7 @@ class Player(Character):
         self.xp = 0
         self.level = 1
         self.upgrade_points = 0
-        self.gold = 100
+        self.gold = 200
 
     def gain_xp(self, amount):
         self.xp += amount
@@ -120,10 +120,10 @@ class Player(Character):
             self.upgrade_points += 3
             self._max_hp += 10
             self.heal(self._max_hp) # Full heal on level up
-            self._max_mp += 5
+            self._max_mp += 10
             self.restore_mp(self._max_mp)
-            self._base_attack += 3
-            self._base_defense += 2
+            self._base_attack += 5
+            self._base_defense += 5
             self._base_evasion = min(100, self._base_evasion + 1)
 
     @property
@@ -163,10 +163,27 @@ class Player(Character):
             crit_multiplier = 2 + (self.total_critical_damage_bonus() / 100)
             damage = int(damage * crit_multiplier)
             target.take_damage(damage)
+            if not target.is_alive:  # Jika monster mati
+                return self.handle_monster_defeat(target, damage, crit=True)
+
             return f"Serangan Kritis! {self.name} memberikan {damage} kerusakan!"
 
         target.take_damage(damage)
+        if not target.is_alive:  # Jika monster mati
+            return self.handle_monster_defeat(target, damage)
+
         return f"{self.name} menyerang dan memberikan {damage} kerusakan!"
+
+    def handle_monster_defeat(self, monster, damage, crit=False):
+        # Memberikan hadiah setelah mengalahkan monster
+        self.heal(50)  # Regenerasi darah
+        self.restore_mp(30)  # Regenerasi MP
+        self.gain_xp(50)  # Mendapatkan XP
+        self.gold += 100  # Mendapatkan gold
+
+        loot = monster.drop_loot()
+        loot_str = ', '.join(item.name for item in loot) if loot else "tidak ada loot"
+        return f"{self.name} mengalahkan {monster.name}! Mendapatkan {loot_str}. Regenerasi 50 HP, 30 MP, 50 XP, dan 100 gold."
 
     def special_attack(self, target):
         mp_cost = 15
@@ -179,6 +196,8 @@ class Player(Character):
         
         damage = max(1, (self.attack_stat * 2) - target.defense_stat)
         target.take_damage(damage)
+        if not target.is_alive:
+            return self.handle_monster_defeat(target, damage)
         return f"{self.name} menggunakan SERANGAN SPESIAL dan memberikan {damage} kerusakan!"
 
     def upgrade_stat(self, stat):
@@ -244,7 +263,7 @@ class Monster(Character):
         return f"{self._name} menggunakan SERANGAN SPESIAL dan memberikan {damage} kerusakan!"
 
     def drop_loot(self):
-        if random.random() <= 0.3: # 30% chance to drop loot
+        if random.random() <= 0.5: # 50% chance to drop loot
             loot_table = [HEALTH_POTION, MP_POTION, WOODEN_SWORD, LEATHER_ARMOR, LUCKY_CHARM, CRIT_RING]
             return [random.choice(loot_table)]
         return []
@@ -256,10 +275,8 @@ class BossMonster(Monster):
         base_attack = 30 + (stage * 15)
         base_defense = 20 + (stage * 10)
         base_evasion = min(70, 30 + (stage * 5))
-        super().__init__(name, stage)
-        self._max_hp, self._hp = base_hp, base_hp
-        self._max_mp, self._mp = base_mp, base_mp
-        self._base_attack, self._base_defense, self._base_evasion = base_attack, base_defense, base_evasion
+        # Call Character.__init__ directly to avoid error
+        Character.__init__(self, name, base_hp, base_mp, base_attack, base_defense, base_evasion)
 
     def special_attack(self, target):
         mp_cost = 20
@@ -274,6 +291,7 @@ class BossMonster(Monster):
     def drop_loot(self):
         loot_table = [IRON_SWORD, CHAINMAIL_ARMOR, LUCKY_CHARM, HEALTH_POTION, MP_POTION, CRIT_RING]
         drops = [random.choice(loot_table)]
-        if random.random() <= 0.5: # 50% chance for a second drop
+        if random.random() <= 0.7: # 70% chance for a second drop
             drops.append(random.choice(loot_table))
         return drops
+
