@@ -3,17 +3,17 @@ from tkinter import messagebox, simpledialog
 from abc import ABC, abstractmethod
 import random
 
-# Constants for UI sizing and fonts
+
 WINDOW_WIDTH = 900
 WINDOW_HEIGHT = 600
 FONT_NAME = "Helvetica"
 FONT_SIZE = 12
 
-# Item Types
+
 ITEM_TYPE_POTION = "potion"
 ITEM_TYPE_EQUIPMENT = "equipment"
 
-# Define items available in the game (potions & equipments)
+
 class Item:
     def __init__(self, name, item_type, stat_bonus=None, heal_amount=0, mp_restore=0, price=0, description=""):
         self.name = name
@@ -38,7 +38,7 @@ class Item:
         else:
             return self.name
 
-# Default potions and equipment
+
 HEALTH_POTION = Item("Health Potion", ITEM_TYPE_POTION, heal_amount=50, price=30,
                      description="Restores 50 HP")
 MP_POTION = Item("Mana Potion", ITEM_TYPE_POTION, mp_restore=30, price=25,
@@ -66,7 +66,7 @@ class Character(ABC):
         self._mp = max_mp
         self._base_attack = attack
         self._base_defense = defense
-        self._base_evasion = evasion  # Percentage (0-100)
+        self._base_evasion = evasion  
         self._alive = True
 
     @property
@@ -223,8 +223,8 @@ class Player(Character):
             return f"{self.name}'s attack missed!"
         damage = self.attack_stat - target.defense_stat
         damage = max(damage, 1)
-        # Critical hit calc
-        crit_chance = 0.2  # Base 20% crit chance
+        
+        crit_chance = 0.2  
         if random.random() < crit_chance:
             crit_multiplier = 2 + (self.total_critical_damage_bonus() / 100)
             damage = int(damage * crit_multiplier)
@@ -242,7 +242,7 @@ class Player(Character):
             return f"{self.name}'s special attack missed!"
         damage = (self.attack_stat * 2) - target.defense_stat
         damage = max(damage, 1)
-        # Critical hit calc for special: same crit chance
+        
         crit_chance = 0.2
         if random.random() < crit_chance:
             crit_multiplier = 2 + (self.total_critical_damage_bonus() / 100)
@@ -280,7 +280,7 @@ class Player(Character):
         elif "defense" in item.stat_bonus:
             slot = "armor"
         elif "evasion" in item.stat_bonus or "critical_damage" in item.stat_bonus:
-            # Detect accessory for evasion or crit dmg
+            
             slot = "accessory"
         else:
             return "Unknown item slot"
@@ -395,12 +395,12 @@ class RPGGameUI:
         self.root.title("Turn-Based RPG Game")
         self.root.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
         self.root.resizable(False, False)
-        self.root.configure(bg="#1a1a2e")  # Dark Tech Blue background
+        self.root.configure(bg="#1a1a2e")  
 
         self.stage = 1
         self.player = Player()
-        self.monsters = []  # list of monsters this stage
-        self.active_monster_index = 0  # which monster player targets / turn from monsters
+        self.monsters = []  
+        self.active_monster_index = 0  
         self.is_player_turn = True
         self.in_battle = False
         self.game_over = False
@@ -495,7 +495,7 @@ class RPGGameUI:
         self.update_player_ui()
 
     def create_monster_ui(self):
-        # Create UI for up to 2 monsters side by side
+        
         self.monster_labels = []
         self.monster_hp_vars = []
         self.monster_mp_vars = []
@@ -654,7 +654,7 @@ class RPGGameUI:
         self.upgrade_hp_button.configure(state=state)
 
     def generate_shop_items(self):
-        # Different potential shop items subsets
+        
         sets = [
             [HEALTH_POTION, MP_POTION, WOODEN_SWORD],
             [HEALTH_POTION, IRON_SWORD, LEATHER_ARMOR],

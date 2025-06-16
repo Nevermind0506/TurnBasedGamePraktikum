@@ -8,7 +8,6 @@ from game_logic import (
     LEATHER_ARMOR, CHAINMAIL_ARMOR, LUCKY_CHARM, CRIT_RING
 )
 
-# Constants for UI
 WINDOW_WIDTH = 900
 WINDOW_HEIGHT = 650
 FONT_NAME = "Helvetica"

@@ -110,13 +110,13 @@ class Player(Character):
         self.xp = 0
         self.level = 1
         self.upgrade_points = 0
-        self.gold = 100
+        self.gold = 200
 
     def gain_xp(self, amount):
         self.xp += amount
         while self.xp >= 100:
             self.xp -= 100
-            self.level += 1
+            self.level += 10
             self.upgrade_points += 3
             self._max_hp += 10
             self.heal(self._max_hp) # Full heal on level up
