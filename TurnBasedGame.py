@@ -356,6 +356,7 @@ class Monster(Character):
             drops.append(item)
         return drops
 
+#boss edit
 class BossMonster(Monster):
     def __init__(self, name, stage):
         base_hp = 120 + (stage * 30)
