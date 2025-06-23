@@ -487,7 +487,7 @@ class RPGGameUI:
             item_text = listbox.get(selected_indices[0])
             item_name_to_find = item_text.split(" x")[0]
 
-            # Find the inventory item object by name
+            # Temukan objek item inventaris berdasarkan nama
             item_to_use = None
             for item in self.party.inventory.keys():
                 if item.name == item_name_to_find:
@@ -498,7 +498,7 @@ class RPGGameUI:
                 messagebox.showerror("Error", "Item tidak ditemukan.", parent=win)
                 return
 
-            # Confirm inventory count > 0 before using
+            # Konfirmasi jumlah inventaris > 0 sebelum menggunakan
             if self.party.inventory.get(item_to_use, 0) <= 0:
                 messagebox.showwarning("Gagal", f"Item tidak tersedia dalam inventaris.", parent=win)
                 return
