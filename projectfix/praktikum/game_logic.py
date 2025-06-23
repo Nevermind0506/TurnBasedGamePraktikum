@@ -79,6 +79,10 @@ class Party:
         return len(self.members)
 
     def is_item_equipped_by_any(self, item, excluding_member=None):
+        """
+        Memeriksa apakah item tertentu dilengkapi oleh anggota party mana pun,
+        opsional tidak termasuk anggota tertentu.
+        """
         for member in self.members:
             if member == excluding_member:
                 continue
@@ -87,6 +91,10 @@ class Party:
         return False
 
     def count_item_equipped(self, item):
+        """
+        Menghitung berapa banyak item spesifik (berdasarkan objek) yang
+        saat ini dilengkapi oleh semua anggota party.
+        """
         count = 0
         for member in self.members:
             for equipped_item in member.equipped_items.values():
@@ -257,31 +265,35 @@ class Player(Character):
 
     # Melengkapi item ke karakter
     def equip_item(self, item, party):
+        # Memastikan item adalah tipe perlengkapan
         if item.item_type != ITEM_TYPE_EQUIPMENT:
             return "Tidak dapat melengkapi item ini."
+
+        # Memastikan item spesifik ini belum dilengkapi oleh karakter ini
+        if item in self.equipped_items.values():
+            return f"{item.name} sudah dilengkapi oleh {self.name}."
+
+        # Memeriksa ketersediaan item di inventaris partai (yang belum dilengkapi)
+        # Jika kuantitas item di inventaris adalah 0, berarti tidak ada item yang tersedia untuk dilengkapi.
         inventory_qty = party.inventory.get(item, 0)
         if inventory_qty == 0:
             return f"{item.name} tidak tersedia di inventaris."
 
-        equipped_count = party.count_item_equipped(item)
-        if item in self.equipped_items.values():
-            return f"{item.name} sudah dilengkapi oleh {self.name}."
-        if equipped_count >= inventory_qty:
-            return f"Semua {item.name} yang tersedia sudah dipakai oleh anggota party lain."
-
-        # Tentukan slot item berdasarkan bonus statistik
+        # Menentukan slot item berdasarkan bonus statistik
         if "attack" in item.stat_bonus:
             slot = "weapon"
         elif "defense" in item.stat_bonus:
             slot = "armor"
-        else:
+        else: # Item yang tidak memiliki bonus serangan atau pertahanan akan masuk slot aksesori
             slot = "accessory"
 
-        # Lepas item lama jika ada
+        # Melepas item lama dari slot jika ada dan mengembalikannya ke inventaris partai
         if self.equipped_items[slot] is not None:
             party.add_item(self.equipped_items[slot], 1)
 
+        # Melengkapi item baru ke karakter
         self.equipped_items[slot] = item
+        # Mengurangi item dari inventaris partai karena sudah dilengkapi
         party.remove_item(item, 1)
         return f"Melengkapi {item.name} di slot {slot}."
 
@@ -294,20 +306,23 @@ class Player(Character):
         removed_item = self.equipped_items[slot]
         self.equipped_items[slot] = None
         if party is not None:
-            party.add_item(removed_item, 1)
+            party.add_item(removed_item, 1) # Tambahkan item yang dilepas kembali ke inventaris party
         return f"Item {removed_item.name} dilepas dari slot {slot}."
 
     # Menggunakan ramuan
     def use_potion(self, item, party=None):
         if item.item_type != ITEM_TYPE_POTION:
             return "Item ini bukan ramuan."
+        # Logika khusus untuk ramuan kebangkitan
         if item.name == "Ramuan Kebangkitan" and not self.is_alive:
             self._alive = True
             self._hp = self._max_hp // 2
             self._mp = self._max_mp // 2
             return f"{self.name} dihidupkan kembali dengan 50% HP dan MP!"
+        # Menggunakan ramuan penyembuh HP
         if item.heal_amount > 0:
             self.heal(item.heal_amount)
+        # Menggunakan ramuan pemulih MP
         if item.mp_restore > 0:
             self.restore_mp(item.mp_restore)
         return f"Menggunakan {item.name}."
@@ -360,7 +375,7 @@ class Monster(Character):
 
     # Serangan spesial monster, dengan peluang 25%
     def special_attack(self, target):
-        if random.random() > 0.25:
+        if random.random() > 0.25: # 25% kemungkinan serangan spesial
             return self.attack(target)
         if target.try_evade():
             return f"Serangan spesial {self._name} meleset!"
@@ -411,5 +426,3 @@ class BossMonster(Monster):
         if random.random() <= 0.7:  # 70% kemungkinan dapat drop tambahan
             drops.append(random.choice(loot_table))
         return drops
-
-#test1
