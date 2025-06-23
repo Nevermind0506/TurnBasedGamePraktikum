@@ -411,3 +411,5 @@ class BossMonster(Monster):
         if random.random() <= 0.7:  # 70% kemungkinan dapat drop tambahan
             drops.append(random.choice(loot_table))
         return drops
+
+#test1
